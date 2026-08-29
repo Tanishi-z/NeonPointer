@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neon Pointer — macOS 用ネオンカーソル常駐アプリ</title>
+<meta name="description" content="マウスカーソルの周りにネオン風の半透明シェイプを表示して、カーソル位置を見つけやすくする macOS 常駐アプリ。">
+<style>
+  :root{
+    --bg:#0b0c10;
+    --bg-elevated:#131620;
+    --border:#242838;
+    --text:#eef0f6;
+    --text-muted:#9aa1b4;
+    --neon-pink:#ff2fd0;
+    --neon-cyan:#26f2e0;
+    --neon-violet:#8b5cf6;
+    --code-bg:#0f1119;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Segoe UI",Roboto,sans-serif;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--neon-cyan);}
+  .wrap{max-width:860px;margin:0 auto;padding:0 24px;}
+
+  /* Hero */
+  .hero{
+    position:relative;
+    overflow:hidden;
+    padding:96px 0 72px;
+    text-align:center;
+    background:
+      radial-gradient(600px 300px at 30% 0%, rgba(255,47,208,0.16), transparent 60%),
+      radial-gradient(600px 320px at 75% 10%, rgba(38,242,224,0.14), transparent 60%);
+    border-bottom:1px solid var(--border);
+  }
+  .cursor-demo{
+    position:relative;
+    width:120px;
+    height:120px;
+    margin:0 auto 40px;
+  }
+  .cursor-ring{
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    border:3px solid var(--neon-pink);
+    box-shadow:
+      0 0 12px var(--neon-pink),
+      0 0 32px var(--neon-pink),
+      0 0 60px rgba(255,47,208,0.5);
+    animation:pulse 2.4s ease-in-out infinite;
+  }
+  .cursor-dot{
+    position:absolute;
+    top:50%;left:50%;
+    width:14px;height:14px;
+    margin:-7px 0 0 -7px;
+    border-radius:50%;
+    background:var(--neon-cyan);
+    box-shadow:0 0 10px var(--neon-cyan), 0 0 24px var(--neon-cyan);
+  }
+  @keyframes pulse{
+    0%,100%{ transform:scale(1); opacity:1; }
+    50%{ transform:scale(0.88); opacity:0.75; }
+  }
+  .eyebrow{
+    display:inline-block;
+    font-size:13px;
+    letter-spacing:.08em;
+    color:var(--text-muted);
+    border:1px solid var(--border);
+    background:var(--bg-elevated);
+    padding:4px 12px;
+    border-radius:999px;
+    margin-bottom:20px;
+  }
+  h1{
+    font-size:clamp(32px,6vw,52px);
+    margin:0 0 12px;
+    background:linear-gradient(90deg, var(--neon-pink), var(--neon-violet) 50%, var(--neon-cyan));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    letter-spacing:-0.01em;
+  }
+  .tagline{
+    font-size:18px;
+    color:var(--text-muted);
+    max-width:520px;
+    margin:0 auto 32px;
+  }
+  .cta-row{
+    display:flex;
+    gap:12px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:12px 22px;
+    border-radius:10px;
+    font-weight:600;
+    font-size:15px;
+    text-decoration:none;
+    border:1px solid transparent;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn-primary{
+    background:linear-gradient(90deg, var(--neon-pink), var(--neon-violet));
+    color:#fff;
+    box-shadow:0 4px 24px rgba(139,92,246,0.35);
+  }
+  .btn-secondary{
+    background:var(--bg-elevated);
+    color:var(--text);
+    border-color:var(--border);
+  }
+
+  /* Sections */
+  section{padding:64px 0;border-bottom:1px solid var(--border);}
+  section:last-of-type{border-bottom:none;}
+  h2{
+    font-size:24px;
+    margin:0 0 28px;
+    color:var(--text);
+  }
+  .features{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+  }
+  .feature{
+    background:var(--bg-elevated);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:20px;
+  }
+  .feature h3{
+    margin:0 0 8px;
+    font-size:16px;
+    color:var(--text);
+  }
+  .feature p{
+    margin:0;
+    font-size:14px;
+    color:var(--text-muted);
+  }
+
+  pre{
+    background:var(--code-bg);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:18px 20px;
+    overflow-x:auto;
+    font-size:13.5px;
+    line-height:1.6;
+  }
+  code{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  :not(pre) > code{
+    background:var(--code-bg);
+    border:1px solid var(--border);
+    border-radius:5px;
+    padding:1px 6px;
+    font-size:13px;
+  }
+
+  ol,ul{color:var(--text-muted);}
+  ol li,ul li{margin-bottom:6px;}
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:14px;
+  }
+  th,td{
+    text-align:left;
+    padding:10px 12px;
+    border-bottom:1px solid var(--border);
+  }
+  th{color:var(--text-muted);font-weight:600;}
+  td code{white-space:nowrap;}
+
+  footer{
+    padding:40px 0 60px;
+    text-align:center;
+    color:var(--text-muted);
+    font-size:13px;
+  }
+  footer a{color:var(--text-muted);text-decoration:underline;}
+
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f7f7fb;
+      --bg-elevated:#ffffff;
+      --border:#e4e4ee;
+      --text:#16171f;
+      --text-muted:#5a5e70;
+      --code-bg:#f0f0f6;
+    }
+    .hero{
+      background:
+        radial-gradient(600px 300px at 30% 0%, rgba(255,47,208,0.10), transparent 60%),
+        radial-gradient(600px 320px at 75% 10%, rgba(38,242,224,0.10), transparent 60%);
+    }
+  }
+</style>
+</head>
+<body>
+
+  <header class="hero">
+    <div class="wrap">
+      <div class="cursor-demo">
+        <div class="cursor-ring"></div>
+        <div class="cursor-dot"></div>
+      </div>
+      <span class="eyebrow">macOS 14+ · メニューバー常駐アプリ</span>
+      <h1>Neon Pointer</h1>
+      <p class="tagline">
+        マウスカーソルの周りにネオン風の半透明シェイプを表示して、
+        カーソル位置を一目で見つけられるようにする macOS 常駐アプリです。
+      </p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://github.com/Tanishi-z/NeonPointer/releases">ダウンロード (Releases)</a>
+        <a class="btn btn-secondary" href="https://github.com/Tanishi-z/NeonPointer">GitHub リポジトリ</a>
+      </div>
+    </div>
+  </header>
+
+  <section>
+    <div class="wrap">
+      <h2>特徴</h2>
+      <div class="features">
+        <div class="feature">
+          <h3>4種類の形状</h3>
+          <p>円・リング・十字・四角からカーソルの装飾形状を選択できます。</p>
+        </div>
+        <div class="feature">
+          <h3>細かなカスタマイズ</h3>
+          <p>色・サイズ・不透明度・グロー（発光の強さ）・線幅を自由に調整できます。</p>
+        </div>
+        <div class="feature">
+          <h3>メニューバーから操作</h3>
+          <p>常駐アプリとしてメニューバーに常駐し、ON/OFFと全設定をそこから操作できます。</p>
+        </div>
+        <div class="feature">
+          <h3>設定は自動保存</h3>
+          <p><code>UserDefaults</code> を使って設定を自動的に保存します。</p>
+        </div>
+        <div class="feature">
+          <h3>操作を邪魔しない</h3>
+          <p>オーバーレイはクリックを透過するため、下のアプリの操作を妨げません。</p>
+        </div>
+        <div class="feature">
+          <h3>アクセシビリティ権限不要</h3>
+          <p><code>NSEvent.mouseLocation</code> のみでカーソル座標を取得するため、権限の許可は不要です。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>必要環境</h2>
+      <ul>
+        <li>macOS 14 以上</li>
+        <li>Xcode 15 以上（コマンドラインビルドに使用）</li>
+        <li><a href="https://github.com/yonaskolb/XcodeGen">XcodeGen</a>: <code>brew install xcodegen</code></li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>ビルド方法</h2>
+      <p>このアプリは配布バイナリではなく、各自の環境でソースからビルドして使用します。</p>
+      <pre><code>git clone https://github.com/Tanishi-z/NeonPointer.git
+cd NeonPointer
+
+make build   # dist/NeonPointer.app を生成
+make run     # ビルドして起動
+make dmg     # dist/NeonPointer.dmg を生成
+make clean   # 生成物を削除</code></pre>
+      <p><code>NeonPointer.xcodeproj</code> は <code>project.yml</code> から <code>xcodegen</code> によって自動生成されます。直接編集せず <code>project.yml</code> を変更してください。</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>インストール</h2>
+      <ol>
+        <li><code>dist/NeonPointer.dmg</code> を開く</li>
+        <li><code>NeonPointer.app</code> を <code>Applications</code> にドラッグ</li>
+        <li>初回のみ、アプリを <strong>右クリック → 開く</strong> を選んで「開く」を押す</li>
+      </ol>
+      <p>
+        未署名アプリのため、ダブルクリックだと「開発元を検証できません」と表示されます。
+        それでも開けない場合は次を実行してください。
+      </p>
+      <pre><code>xattr -cr /Applications/NeonPointer.app</code></pre>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>構成</h2>
+      <table>
+        <tbody>
+          <tr><td><code>NeonPointerApp.swift</code></td><td>エントリポイント。<code>MenuBarExtra</code> を定義</td></tr>
+          <tr><td><code>AppDelegate.swift</code></td><td>オーバーレイの起動・終了</td></tr>
+          <tr><td><code>SettingsStore.swift</code></td><td>設定モデルと永続化</td></tr>
+          <tr><td><code>PointerShape.swift</code></td><td>形状の定義と <code>CGPath</code> 生成</td></tr>
+          <tr><td><code>OverlayPanel.swift</code></td><td>クリック透過の全スペース表示パネル</td></tr>
+          <tr><td><code>NeonCursorView.swift</code></td><td><code>CAShapeLayer</code> によるネオン描画</td></tr>
+          <tr><td><code>CursorTracker.swift</code></td><td><code>CADisplayLink</code> によるカーソル追従</td></tr>
+          <tr><td><code>OverlayController.swift</code></td><td>設定・追従・描画の統合</td></tr>
+          <tr><td><code>SettingsView.swift</code></td><td>SwiftUI 設定画面</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <p>
+      Neon Pointer is licensed under the <a href="https://github.com/Tanishi-z/NeonPointer/blob/main/LICENSE">MIT License</a>.
+      &nbsp;·&nbsp;
+      <a href="https://github.com/Tanishi-z/NeonPointer">github.com/Tanishi-z/NeonPointer</a>
+    </p>
+  </footer>
+
+</body>
+</html>
