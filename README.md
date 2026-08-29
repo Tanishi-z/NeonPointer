@@ -32,7 +32,7 @@ make clean   # 生成物を削除
 
 ## インストール
 
-1. `dist/NeonPointer.dmg` を開く
+1. [Releases](https://github.com/Tanishi-z/NeonPointer/releases/latest) から `NeonPointer.dmg` をダウンロードして開く（自分でビルドした場合は `dist/NeonPointer.dmg`）
 2. `NeonPointer.app` を `Applications` にドラッグ
 3. 初回のみ、アプリを **右クリック → 開く** を選んで「開く」を押す
 

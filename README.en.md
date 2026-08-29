@@ -32,7 +32,7 @@ make clean   # remove build artifacts
 
 ## Install
 
-1. Open `dist/NeonPointer.dmg`
+1. Download `NeonPointer.dmg` from [Releases](https://github.com/Tanishi-z/NeonPointer/releases/latest) and open it (or `dist/NeonPointer.dmg` if you built it yourself)
 2. Drag `NeonPointer.app` into `Applications`
 3. The first time only, **right-click → Open** the app and confirm "Open"
 
