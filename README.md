@@ -16,10 +16,13 @@
 ## 必要環境
 
 - macOS 14 以上
-- Xcode 15 以上（コマンドラインビルドに使用）
-- [XcodeGen](https://github.com/yonaskolb/XcodeGen): `brew install xcodegen`
 
 ## ビルド
+
+[Releases](https://github.com/Tanishi-z/NeonPointer/releases/latest) の dmg を使わず、自分でソースからビルドする場合は以下が必要です。
+
+- Xcode 15 以上（コマンドラインビルドに使用）
+- [XcodeGen](https://github.com/yonaskolb/XcodeGen): `brew install xcodegen`
 
 ```sh
 make build   # dist/NeonPointer.app を生成

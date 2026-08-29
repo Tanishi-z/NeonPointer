@@ -16,10 +16,13 @@ Landing page: https://tanishi-z.github.io/NeonPointer/
 ## Requirements
 
 - macOS 14 or later
-- Xcode 15 or later (used for command-line builds)
-- [XcodeGen](https://github.com/yonaskolb/XcodeGen): `brew install xcodegen`
 
 ## Build
+
+If you'd rather not use the prebuilt dmg from [Releases](https://github.com/Tanishi-z/NeonPointer/releases/latest), you can build it from source instead. This requires:
+
+- Xcode 15 or later (used for command-line builds)
+- [XcodeGen](https://github.com/yonaskolb/XcodeGen): `brew install xcodegen`
 
 ```sh
 make build   # produces dist/NeonPointer.app
