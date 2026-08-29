@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Neon Pointer — macOS 用ネオンカーソル常駐アプリ</title>
-<meta name="description" content="マウスカーソルの周りにネオン風の半透明シェイプを表示して、カーソル位置を見つけやすくする macOS 常駐アプリ。">
+<title>Neon Pointer — a neon cursor menu bar app for macOS</title>
+<meta name="description" content="A macOS menu bar app that draws a translucent neon shape around your mouse cursor, making it easier to spot on screen.">
 <style>
   :root{
     --bg:#0b0c10;
@@ -236,52 +236,52 @@
 <body>
 
   <header class="hero">
-    <nav class="lang-switch"><a class="active" href="./">日本語</a> / <a href="en/">English</a></nav>
+    <nav class="lang-switch"><a href="../">日本語</a> / <a class="active" href="./">English</a></nav>
     <div class="wrap">
       <div class="cursor-demo">
         <div class="cursor-ring"></div>
         <div class="cursor-dot"></div>
       </div>
-      <span class="eyebrow">macOS 14+ · メニューバー常駐アプリ</span>
+      <span class="eyebrow">macOS 14+ · menu bar app</span>
       <h1>Neon Pointer</h1>
       <p class="tagline">
-        マウスカーソルの周りにネオン風の半透明シェイプを表示して、
-        カーソル位置を一目で見つけられるようにする macOS 常駐アプリです。
+        A macOS menu bar app that draws a translucent neon shape around your
+        mouse cursor, so you can always spot it at a glance.
       </p>
       <div class="cta-row">
-        <a class="btn btn-primary" href="https://github.com/Tanishi-z/NeonPointer/releases">ダウンロード (Releases)</a>
-        <a class="btn btn-secondary" href="https://github.com/Tanishi-z/NeonPointer">GitHub リポジトリ</a>
+        <a class="btn btn-primary" href="https://github.com/Tanishi-z/NeonPointer/releases">Download (Releases)</a>
+        <a class="btn btn-secondary" href="https://github.com/Tanishi-z/NeonPointer">GitHub Repository</a>
       </div>
     </div>
   </header>
 
   <section>
     <div class="wrap">
-      <h2>特徴</h2>
+      <h2>Features</h2>
       <div class="features">
         <div class="feature">
-          <h3>4種類の形状</h3>
-          <p>円・リング・十字・四角からカーソルの装飾形状を選択できます。</p>
+          <h3>4 shapes</h3>
+          <p>Choose from circle, ring, cross, or square as the cursor decoration.</p>
         </div>
         <div class="feature">
-          <h3>細かなカスタマイズ</h3>
-          <p>色・サイズ・不透明度・グロー（発光の強さ）・線幅を自由に調整できます。</p>
+          <h3>Fine-grained customization</h3>
+          <p>Freely adjust color, size, opacity, glow intensity, and line width.</p>
         </div>
         <div class="feature">
-          <h3>メニューバーから操作</h3>
-          <p>常駐アプリとしてメニューバーに常駐し、ON/OFFと全設定をそこから操作できます。</p>
+          <h3>Menu bar control</h3>
+          <p>Runs as a menu bar app — toggle it on/off and change every setting from there.</p>
         </div>
         <div class="feature">
-          <h3>設定は自動保存</h3>
-          <p><code>UserDefaults</code> を使って設定を自動的に保存します。</p>
+          <h3>Settings auto-save</h3>
+          <p>Settings are persisted automatically using <code>UserDefaults</code>.</p>
         </div>
         <div class="feature">
-          <h3>操作を邪魔しない</h3>
-          <p>オーバーレイはクリックを透過するため、下のアプリの操作を妨げません。</p>
+          <h3>Never gets in your way</h3>
+          <p>The overlay is click-through, so it never interferes with the app underneath.</p>
         </div>
         <div class="feature">
-          <h3>アクセシビリティ権限不要</h3>
-          <p><code>NSEvent.mouseLocation</code> のみでカーソル座標を取得するため、権限の許可は不要です。</p>
+          <h3>No Accessibility permission needed</h3>
+          <p>Cursor position is read only via <code>NSEvent.mouseLocation</code>, so no permission prompt is required.</p>
         </div>
       </div>
     </div>
@@ -289,10 +289,10 @@
 
   <section>
     <div class="wrap">
-      <h2>必要環境</h2>
+      <h2>Requirements</h2>
       <ul>
-        <li>macOS 14 以上</li>
-        <li>Xcode 15 以上（コマンドラインビルドに使用）</li>
+        <li>macOS 14 or later</li>
+        <li>Xcode 15 or later (used for command-line builds)</li>
         <li><a href="https://github.com/yonaskolb/XcodeGen">XcodeGen</a>: <code>brew install xcodegen</code></li>
       </ul>
     </div>
@@ -300,30 +300,30 @@
 
   <section>
     <div class="wrap">
-      <h2>ビルド方法</h2>
-      <p>このアプリは配布バイナリではなく、各自の環境でソースからビルドして使用します。</p>
+      <h2>Build</h2>
+      <p>This app isn't distributed as a prebuilt binary — you build it from source on your own machine.</p>
       <pre><code>git clone https://github.com/Tanishi-z/NeonPointer.git
 cd NeonPointer
 
-make build   # dist/NeonPointer.app を生成
-make run     # ビルドして起動
-make dmg     # dist/NeonPointer.dmg を生成
-make clean   # 生成物を削除</code></pre>
-      <p><code>NeonPointer.xcodeproj</code> は <code>project.yml</code> から <code>xcodegen</code> によって自動生成されます。直接編集せず <code>project.yml</code> を変更してください。</p>
+make build   # produces dist/NeonPointer.app
+make run     # build and launch
+make dmg     # produces dist/NeonPointer.dmg
+make clean   # remove build artifacts</code></pre>
+      <p><code>NeonPointer.xcodeproj</code> is generated automatically from <code>project.yml</code> via <code>xcodegen</code>. Don't edit it directly — change <code>project.yml</code> instead.</p>
     </div>
   </section>
 
   <section>
     <div class="wrap">
-      <h2>インストール</h2>
+      <h2>Install</h2>
       <ol>
-        <li><code>dist/NeonPointer.dmg</code> を開く</li>
-        <li><code>NeonPointer.app</code> を <code>Applications</code> にドラッグ</li>
-        <li>初回のみ、アプリを <strong>右クリック → 開く</strong> を選んで「開く」を押す</li>
+        <li>Open <code>dist/NeonPointer.dmg</code></li>
+        <li>Drag <code>NeonPointer.app</code> into <code>Applications</code></li>
+        <li>The first time only, <strong>right-click → Open</strong> the app and confirm "Open"</li>
       </ol>
       <p>
-        未署名アプリのため、ダブルクリックだと「開発元を検証できません」と表示されます。
-        それでも開けない場合は次を実行してください。
+        Since the app is unsigned, double-clicking it will show a "developer cannot be verified" warning.
+        If it still won't open, run:
       </p>
       <pre><code>xattr -cr /Applications/NeonPointer.app</code></pre>
     </div>
@@ -331,18 +331,18 @@ make clean   # 生成物を削除</code></pre>
 
   <section>
     <div class="wrap">
-      <h2>構成</h2>
+      <h2>Project layout</h2>
       <table>
         <tbody>
-          <tr><td><code>NeonPointerApp.swift</code></td><td>エントリポイント。<code>MenuBarExtra</code> を定義</td></tr>
-          <tr><td><code>AppDelegate.swift</code></td><td>オーバーレイの起動・終了</td></tr>
-          <tr><td><code>SettingsStore.swift</code></td><td>設定モデルと永続化</td></tr>
-          <tr><td><code>PointerShape.swift</code></td><td>形状の定義と <code>CGPath</code> 生成</td></tr>
-          <tr><td><code>OverlayPanel.swift</code></td><td>クリック透過の全スペース表示パネル</td></tr>
-          <tr><td><code>NeonCursorView.swift</code></td><td><code>CAShapeLayer</code> によるネオン描画</td></tr>
-          <tr><td><code>CursorTracker.swift</code></td><td><code>CADisplayLink</code> によるカーソル追従</td></tr>
-          <tr><td><code>OverlayController.swift</code></td><td>設定・追従・描画の統合</td></tr>
-          <tr><td><code>SettingsView.swift</code></td><td>SwiftUI 設定画面</td></tr>
+          <tr><td><code>NeonPointerApp.swift</code></td><td>Entry point. Defines the <code>MenuBarExtra</code></td></tr>
+          <tr><td><code>AppDelegate.swift</code></td><td>Starts and stops the overlay</td></tr>
+          <tr><td><code>SettingsStore.swift</code></td><td>Settings model and persistence</td></tr>
+          <tr><td><code>PointerShape.swift</code></td><td>Shape definitions and <code>CGPath</code> generation</td></tr>
+          <tr><td><code>OverlayPanel.swift</code></td><td>Click-through, all-spaces overlay panel</td></tr>
+          <tr><td><code>NeonCursorView.swift</code></td><td>Neon rendering via <code>CAShapeLayer</code></td></tr>
+          <tr><td><code>CursorTracker.swift</code></td><td>Cursor tracking via <code>CADisplayLink</code></td></tr>
+          <tr><td><code>OverlayController.swift</code></td><td>Wires together settings, tracking, and rendering</td></tr>
+          <tr><td><code>SettingsView.swift</code></td><td>SwiftUI settings screen</td></tr>
         </tbody>
       </table>
     </div>

@@ -1,5 +1,7 @@
 # Neon Pointer
 
+[English](README.en.md) | 日本語
+
 マウスカーソルの周りにネオン風の半透明シェイプを表示して、カーソル位置を見つけやすくする macOS 常駐アプリです。
 
 紹介ページ: https://tanishi-z.github.io/NeonPointer/
