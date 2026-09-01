@@ -27,6 +27,9 @@ struct NeonConfiguration: Equatable {
 }
 
 final class NeonCursorView: NSView {
+    /// カーソル位置に追従する層。ビュー自体はスクリーン全面に固定され、
+    /// この層だけを `position` で動かすことで、ウィンドウをまたぐ移動を避ける。
+    private let neonLayer = CALayer()
     private let outerGlowLayer = CAShapeLayer()
     private let glowLayer = CAShapeLayer()
     private let coreLayer = CAShapeLayer()
@@ -42,14 +45,17 @@ final class NeonCursorView: NSView {
 
     init(configuration: NeonConfiguration) {
         self.configuration = configuration
-        super.init(frame: CGRect(origin: .zero, size: configuration.canvasSize))
+        super.init(frame: .zero)
         wantsLayer = true
         layer?.masksToBounds = false
+        neonLayer.masksToBounds = false
+        neonLayer.bounds = CGRect(origin: .zero, size: configuration.canvasSize)
+        layer?.addSublayer(neonLayer)
         for shapeLayer in shapeLayers {
             shapeLayer.masksToBounds = false
             shapeLayer.lineCap = .round
             shapeLayer.lineJoin = .round
-            layer?.addSublayer(shapeLayer)
+            neonLayer.addSublayer(shapeLayer)
         }
     }
 
@@ -67,8 +73,21 @@ final class NeonCursorView: NSView {
         super.viewDidChangeBackingProperties()
         let scale = window?.backingScaleFactor ?? 2
         layer?.contentsScale = scale
+        neonLayer.contentsScale = scale
         shapeLayers.forEach { $0.contentsScale = scale }
         redraw()
+    }
+
+    /// カーソルのグローバル座標と、このビューが乗っているスクリーンの原点を渡して
+    /// ネオン層を移動させる。ウィンドウ自体は動かさない。
+    func update(cursorLocation: CGPoint, screenOrigin: CGPoint) {
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        neonLayer.position = CGPoint(
+            x: cursorLocation.x - screenOrigin.x,
+            y: cursorLocation.y - screenOrigin.y
+        )
+        CATransaction.commit()
     }
 
     private func redraw() {
@@ -76,10 +95,13 @@ final class NeonCursorView: NSView {
         CATransaction.setDisableActions(true)
         defer { CATransaction.commit() }
 
+        let canvasSize = configuration.canvasSize
+        neonLayer.bounds = CGRect(origin: .zero, size: canvasSize)
+
         let side = configuration.size
         let rect = CGRect(
-            x: (bounds.width - side) / 2,
-            y: (bounds.height - side) / 2,
+            x: (canvasSize.width - side) / 2,
+            y: (canvasSize.height - side) / 2,
             width: side,
             height: side
         )
@@ -87,9 +109,8 @@ final class NeonCursorView: NSView {
         let path = configuration.shape.path(in: rect, strokeWidth: strokeWidth)
         let color = configuration.color
 
-        layer?.frame = bounds
-        layer?.opacity = Float(configuration.opacity)
-        shapeLayers.forEach { $0.frame = bounds }
+        neonLayer.opacity = Float(configuration.opacity)
+        shapeLayers.forEach { $0.frame = CGRect(origin: .zero, size: canvasSize) }
 
         // 半径違いの影を重ねて、単層では出しきれないネオン管の滲みを作る。
         for (glow, spread) in [(outerGlowLayer, 2.0), (glowLayer, 0.8)] {
