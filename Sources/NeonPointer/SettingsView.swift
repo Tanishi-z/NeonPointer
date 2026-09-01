@@ -2,12 +2,20 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject private var settings: SettingsStore
+    @ObservedObject private var loginItem = LoginItemManager.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Toggle("ネオンポインタを表示", isOn: $settings.isEnabled)
                 .toggleStyle(.switch)
                 .font(.headline)
+
+            Toggle("ログイン時に自動的に起動", isOn: Binding(
+                get: { loginItem.isEnabled },
+                set: { loginItem.setEnabled($0) }
+            ))
+            .toggleStyle(.switch)
+            .font(.callout)
 
             Divider()
 
@@ -61,6 +69,7 @@ struct SettingsView: View {
         }
         .padding(16)
         .frame(width: 300)
+        .onAppear { loginItem.refresh() }
     }
 }
 
