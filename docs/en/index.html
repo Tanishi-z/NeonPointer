@@ -268,8 +268,16 @@
           <p>Freely adjust color, size, opacity, glow intensity, and line width.</p>
         </div>
         <div class="feature">
+          <h3>Draw on screen</h3>
+          <p>Hold a modifier key while moving the cursor to leave a line behind. Drawn lines fade away on their own.</p>
+        </div>
+        <div class="feature">
           <h3>Menu bar control</h3>
           <p>Runs as a menu bar app — toggle it on/off and change every setting from there.</p>
+        </div>
+        <div class="feature">
+          <h3>Launch at login</h3>
+          <p>Supports launching automatically at login, toggleable from the settings screen.</p>
         </div>
         <div class="feature">
           <h3>Settings auto-save</h3>
@@ -281,9 +289,33 @@
         </div>
         <div class="feature">
           <h3>No Accessibility permission needed</h3>
-          <p>Cursor position is read only via <code>NSEvent.mouseLocation</code>, so no permission prompt is required.</p>
+          <p>Cursor position and modifier-key state are read purely by polling <code>NSEvent.mouseLocation</code> and <code>NSEvent.modifierFlags</code>, so no permission prompt is required.</p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Drawing on screen</h2>
+      <p>
+        Hold a modifier key (⌥ Option by default) while moving the cursor to leave a neon trail behind it.
+        Release the key and the trail stays for a while, then fades out.
+      </p>
+      <p>
+        If you start drawing again before a fading trail disappears completely, it snaps back to full brightness.
+        Once a trail has fully faded, it's gone for good.
+      </p>
+      <table>
+        <tbody>
+          <tr><td>Modifier key</td><td>Default ⌥ / choose from ⌥, ⌃, ⇧, ⌘, fn</td></tr>
+          <tr><td>Hold before fading</td><td>Default 2.0 s / 0.2–30 s</td></tr>
+          <tr><td>Fade duration</td><td>Default 1.5 s / 0.1–10 s</td></tr>
+          <tr><td>Line width</td><td>Default 6 pt / 1–40 pt</td></tr>
+          <tr><td>Line glow</td><td>Default 14 / 0–60</td></tr>
+          <tr><td>Color</td><td>Default same as cursor / can be set independently</td></tr>
+        </tbody>
+      </table>
     </div>
   </section>
 
@@ -345,6 +377,10 @@ make clean   # remove build artifacts</code></pre>
           <tr><td><code>CursorTracker.swift</code></td><td>Cursor tracking via <code>CADisplayLink</code></td></tr>
           <tr><td><code>OverlayController.swift</code></td><td>Wires together settings, tracking, and rendering</td></tr>
           <tr><td><code>SettingsView.swift</code></td><td>SwiftUI settings screen</td></tr>
+          <tr><td><code>StrokeTrail.swift</code></td><td>Manages trail stroke points, paths, and fade state</td></tr>
+          <tr><td><code>TrailModifier.swift</code></td><td>Defines the modifier key that triggers trail drawing</td></tr>
+          <tr><td><code>LoginItemManager.swift</code></td><td>Launch at login (<code>SMAppService</code>)</td></tr>
+          <tr><td><code>ColorPanelController.swift</code></td><td>Controls the color picker panel (<code>NSColorPanel</code>)</td></tr>
         </tbody>
       </table>
     </div>

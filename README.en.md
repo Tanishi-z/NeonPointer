@@ -8,10 +8,28 @@ Landing page: https://tanishi-z.github.io/NeonPointer/
 
 - Shapes: circle / ring / cross / square
 - Adjustable color, size, opacity, glow intensity, and line width
+- **Hold a modifier key while moving the cursor to draw on screen** (the line fades away on its own after a while)
 - Toggle on/off and change all settings from the menu bar
+- Launches automatically at login
+- Works across multiple displays
 - Settings are saved automatically (`UserDefaults`)
 - The overlay is click-through, so it never gets in the way of the app underneath
-- Cursor position is read only via `NSEvent.mouseLocation`, so **no Accessibility permission is required**
+- Cursor position and modifier-key state are read purely by polling `NSEvent.mouseLocation` / `NSEvent.modifierFlags`, so **neither Accessibility nor Input Monitoring permission is required**
+
+## Drawing on screen
+
+Hold a modifier key (⌥ Option by default) while moving the cursor to leave a neon trail behind it. Release the key and the trail stays for a while, then fades out.
+
+If you start drawing again before a fading trail disappears completely, it snaps back to full brightness. Once a trail has fully faded, it's gone for good.
+
+| Setting | Default | Range |
+| --- | --- | --- |
+| Modifier key | ⌥ | ⌥ / ⌃ / ⇧ / ⌘ / fn |
+| Hold before fading | 2.0 s | 0.2–30 s |
+| Fade duration | 1.5 s | 0.1–10 s |
+| Line width | 6 pt | 1–40 pt |
+| Line glow | 14 | 0–60 |
+| Color | Same as cursor | Can be set independently |
 
 ## Requirements
 
@@ -68,6 +86,10 @@ To notarize the app, run `xcrun notarytool submit` and `xcrun stapler staple` ag
 | `Sources/NeonPointer/CursorTracker.swift` | Cursor tracking via `CADisplayLink` |
 | `Sources/NeonPointer/OverlayController.swift` | Wires together settings, tracking, and rendering |
 | `Sources/NeonPointer/SettingsView.swift` | SwiftUI settings screen |
+| `Sources/NeonPointer/StrokeTrail.swift` | Manages trail stroke points, paths, and fade state |
+| `Sources/NeonPointer/TrailModifier.swift` | Defines the modifier key that triggers trail drawing |
+| `Sources/NeonPointer/LoginItemManager.swift` | Launch at login (`SMAppService`) |
+| `Sources/NeonPointer/ColorPanelController.swift` | Controls the color picker panel (`NSColorPanel`) |
 
 ## License
 

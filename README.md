@@ -8,10 +8,28 @@
 
 - 形状: 円 / リング / 十字 / 四角
 - 色・サイズ・不透明度・グロー（発光の強さ）・線幅を調整可能
+- **修飾キーを押しながらカーソルを動かすと画面に線を描ける**（描いた線は時間経過で自動的に消える）
 - メニューバーから ON/OFF と全設定を操作
+- ログイン時の自動起動に対応
+- 複数ディスプレイに対応
 - 設定は自動保存（`UserDefaults`）
 - オーバーレイはクリックを透過するので、下のアプリの操作を邪魔しません
-- カーソル座標の取得に `NSEvent.mouseLocation` のみを使うため、**アクセシビリティ権限は不要**です
+- カーソル座標と修飾キーの状態を `NSEvent.mouseLocation` / `NSEvent.modifierFlags` のポーリングだけで取得するため、**アクセシビリティ権限・入力監視権限のどちらも不要**です
+
+## 線を描く
+
+修飾キー（既定は ⌥ Option）を押しながらカーソルを動かすと、その軌跡がネオンの線として画面に残ります。キーを離すと設定した時間そのまま残り、その後フェードアウトして消えます。
+
+消えかけている線がある間にもう一度描き始めると、その線は元の濃さに戻ります（完全に消えた線は戻りません）。
+
+| 設定 | 既定 | 範囲 |
+| --- | --- | --- |
+| 修飾キー | ⌥ | ⌥ / ⌃ / ⇧ / ⌘ / fn |
+| 消え始めるまで | 2.0 秒 | 0.2〜30 秒 |
+| フェードアウト | 1.5 秒 | 0.1〜10 秒 |
+| 線の太さ | 6 pt | 1〜40 pt |
+| 線のグロー | 14 | 0〜60 |
+| 色 | カーソルと同じ | 個別指定も可能 |
 
 ## 必要環境
 
@@ -68,6 +86,10 @@ SIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" make dmg
 | `Sources/NeonPointer/CursorTracker.swift` | `CADisplayLink` によるカーソル追従 |
 | `Sources/NeonPointer/OverlayController.swift` | 設定・追従・描画の統合 |
 | `Sources/NeonPointer/SettingsView.swift` | SwiftUI 設定画面 |
+| `Sources/NeonPointer/StrokeTrail.swift` | 軌跡ストロークの点列・パス・フェード状態の管理 |
+| `Sources/NeonPointer/TrailModifier.swift` | 軌跡描画のトリガーとなる修飾キーの定義 |
+| `Sources/NeonPointer/LoginItemManager.swift` | ログイン時の自動起動（`SMAppService`） |
+| `Sources/NeonPointer/ColorPanelController.swift` | 色選択パネル（`NSColorPanel`）の制御 |
 
 ## ライセンス
 

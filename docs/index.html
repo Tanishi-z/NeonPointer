@@ -268,8 +268,16 @@
           <p>色・サイズ・不透明度・グロー（発光の強さ）・線幅を自由に調整できます。</p>
         </div>
         <div class="feature">
+          <h3>カーソルで線を描ける</h3>
+          <p>修飾キーを押しながらカーソルを動かすと線が残ります。描いた線は時間経過で自動的に消えます。</p>
+        </div>
+        <div class="feature">
           <h3>メニューバーから操作</h3>
           <p>常駐アプリとしてメニューバーに常駐し、ON/OFFと全設定をそこから操作できます。</p>
+        </div>
+        <div class="feature">
+          <h3>ログイン時に自動起動</h3>
+          <p>設定画面から切り替えられるログイン時の自動起動に対応しています。</p>
         </div>
         <div class="feature">
           <h3>設定は自動保存</h3>
@@ -281,9 +289,32 @@
         </div>
         <div class="feature">
           <h3>アクセシビリティ権限不要</h3>
-          <p><code>NSEvent.mouseLocation</code> のみでカーソル座標を取得するため、権限の許可は不要です。</p>
+          <p><code>NSEvent.mouseLocation</code> と <code>NSEvent.modifierFlags</code> のポーリングのみでカーソル座標と修飾キーの状態を取得するため、権限の許可は不要です。</p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>線を描く</h2>
+      <p>
+        修飾キー（既定は ⌥ Option）を押しながらカーソルを動かすと、その軌跡がネオンの線として画面に残ります。
+        キーを離すと設定した時間そのまま残り、その後フェードアウトして消えます。
+      </p>
+      <p>
+        消えかけている線がある間にもう一度描き始めると、その線は元の濃さに戻ります（完全に消えた線は戻りません）。
+      </p>
+      <table>
+        <tbody>
+          <tr><td>修飾キー</td><td>既定 ⌥ / ⌥・⌃・⇧・⌘・fn から選択</td></tr>
+          <tr><td>消え始めるまで</td><td>既定 2.0 秒 / 0.2〜30 秒</td></tr>
+          <tr><td>フェードアウト</td><td>既定 1.5 秒 / 0.1〜10 秒</td></tr>
+          <tr><td>線の太さ</td><td>既定 6 pt / 1〜40 pt</td></tr>
+          <tr><td>線のグロー</td><td>既定 14 / 0〜60</td></tr>
+          <tr><td>色</td><td>既定はカーソルと同じ / 個別指定も可能</td></tr>
+        </tbody>
+      </table>
     </div>
   </section>
 
@@ -345,6 +376,10 @@ make clean   # 生成物を削除</code></pre>
           <tr><td><code>CursorTracker.swift</code></td><td><code>CADisplayLink</code> によるカーソル追従</td></tr>
           <tr><td><code>OverlayController.swift</code></td><td>設定・追従・描画の統合</td></tr>
           <tr><td><code>SettingsView.swift</code></td><td>SwiftUI 設定画面</td></tr>
+          <tr><td><code>StrokeTrail.swift</code></td><td>軌跡ストロークの点列・パス・フェード状態の管理</td></tr>
+          <tr><td><code>TrailModifier.swift</code></td><td>軌跡描画のトリガーとなる修飾キーの定義</td></tr>
+          <tr><td><code>LoginItemManager.swift</code></td><td>ログイン時の自動起動（<code>SMAppService</code>）</td></tr>
+          <tr><td><code>ColorPanelController.swift</code></td><td>色選択パネル（<code>NSColorPanel</code>）の制御</td></tr>
         </tbody>
       </table>
     </div>
