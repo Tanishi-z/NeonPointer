@@ -172,6 +172,65 @@
     color:var(--text-muted);
   }
 
+  /* Trail demo (線を描くセクション) */
+  .trail-demo{
+    position:relative;
+    background:var(--bg-elevated);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:20px 20px 12px;
+    margin-bottom:28px;
+    overflow:hidden;
+  }
+  .trail-demo svg{
+    display:block;
+    width:100%;
+    height:auto;
+  }
+  .stop-a{ stop-color:var(--neon-pink); }
+  .stop-b{ stop-color:var(--neon-violet); }
+  .stop-c{ stop-color:var(--neon-cyan); }
+  .trail-path{
+    fill:none;
+    stroke:url(#trailGradient);
+    stroke-width:5;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    filter:
+      drop-shadow(0 0 4px var(--neon-cyan))
+      drop-shadow(0 0 16px var(--neon-violet));
+    stroke-dasharray:500;
+    stroke-dashoffset:500;
+    animation:trail-draw 5s linear infinite;
+  }
+  .trail-key{
+    position:absolute;
+    top:16px;
+    left:20px;
+    font-size:12px;
+    font-weight:600;
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:2px 8px;
+    color:var(--text-muted);
+    animation:trail-key-pulse 5s linear infinite;
+  }
+  @keyframes trail-draw{
+    0%{ stroke-dashoffset:500; opacity:1; }
+    20%{ stroke-dashoffset:0; opacity:1; }
+    60%{ stroke-dashoffset:0; opacity:1; }
+    90%{ stroke-dashoffset:0; opacity:0; }
+    100%{ stroke-dashoffset:500; opacity:0; }
+  }
+  @keyframes trail-key-pulse{
+    0%,20%{ color:var(--text); border-color:var(--neon-cyan); }
+    60%,100%{ color:var(--text-muted); border-color:var(--border); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .trail-path{ animation:none; stroke-dashoffset:0; opacity:.9; }
+    .trail-key{ animation:none; color:var(--text-muted); border-color:var(--border); }
+  }
+
   pre{
     background:var(--code-bg);
     border:1px solid var(--border);
@@ -298,6 +357,19 @@
   <section>
     <div class="wrap">
       <h2>Drawing on screen</h2>
+      <div class="trail-demo" aria-hidden="true">
+        <svg viewBox="0 0 340 130" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="trailGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop class="stop-a" offset="0%" />
+              <stop class="stop-b" offset="50%" />
+              <stop class="stop-c" offset="100%" />
+            </linearGradient>
+          </defs>
+          <path class="trail-path" d="M20,100 C70,20 110,20 160,65 C210,110 260,20 320,45" />
+        </svg>
+        <span class="trail-key">⌥</span>
+      </div>
       <p>
         Hold a modifier key (⌥ Option by default) while moving the cursor to leave a neon trail behind it.
         Release the key and the trail stays for a while, then fades out.
