@@ -60,6 +60,57 @@ struct SettingsView: View {
 
             Divider()
 
+            VStack(alignment: .leading, spacing: 12) {
+                Toggle("修飾キーで線を描く", isOn: $settings.trailEnabled)
+                    .toggleStyle(.switch)
+                    .font(.callout)
+
+                if settings.trailEnabled {
+                    Picker("修飾キー", selection: $settings.trailModifier) {
+                        ForEach(TrailModifier.allCases) { modifier in
+                            Text(modifier.displayName).tag(modifier)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+
+                    SliderRow(
+                        title: "消え始めるまで",
+                        value: $settings.trailHoldDuration,
+                        range: SettingsStore.trailHoldRange
+                    ) { String(format: "%.1f 秒", $0) }
+
+                    SliderRow(
+                        title: "フェードアウト",
+                        value: $settings.trailFadeDuration,
+                        range: SettingsStore.trailFadeRange
+                    ) { String(format: "%.1f 秒", $0) }
+
+                    SliderRow(
+                        title: "線の太さ",
+                        value: $settings.trailWidth,
+                        range: SettingsStore.trailWidthRange
+                    ) { "\(Int($0)) pt" }
+
+                    SliderRow(
+                        title: "線のグロー",
+                        value: $settings.trailGlowRadius,
+                        range: SettingsStore.trailGlowRange
+                    ) { "\(Int($0))" }
+
+                    Toggle("カーソルと同じ色", isOn: $settings.trailUsesCursorColor)
+                        .toggleStyle(.switch)
+                        .font(.callout)
+
+                    if !settings.trailUsesCursorColor {
+                        ColorRow(rgba: $settings.trailRGBA)
+                    }
+                }
+            }
+            .disabled(!settings.isEnabled)
+
+            Divider()
+
             HStack {
                 Button("デフォルトに戻す") { settings.resetToDefaults() }
                 Spacer()

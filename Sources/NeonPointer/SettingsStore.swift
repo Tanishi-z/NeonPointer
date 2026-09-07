@@ -56,6 +56,14 @@ final class SettingsStore: ObservableObject {
         static let glowRadius = "glowRadius"
         static let strokeWidth = "strokeWidth"
         static let color = "color"
+        static let trailEnabled = "trailEnabled"
+        static let trailModifier = "trailModifier"
+        static let trailHoldDuration = "trailHoldDuration"
+        static let trailFadeDuration = "trailFadeDuration"
+        static let trailWidth = "trailWidth"
+        static let trailGlowRadius = "trailGlowRadius"
+        static let trailUsesCursorColor = "trailUsesCursorColor"
+        static let trailColor = "trailColor"
     }
 
     private enum Default {
@@ -66,12 +74,24 @@ final class SettingsStore: ObservableObject {
         static let glowRadius: Double = 18
         static let strokeWidth: Double = 4
         static let color = RGBAColor.neonCyan
+        static let trailEnabled = true
+        static let trailModifier = TrailModifier.option
+        static let trailHoldDuration: Double = 2.0
+        static let trailFadeDuration: Double = 1.5
+        static let trailWidth: Double = 6
+        static let trailGlowRadius: Double = 14
+        static let trailUsesCursorColor = true
+        static let trailColor = RGBAColor.neonCyan
     }
 
     static let sizeRange: ClosedRange<Double> = 12...220
     static let opacityRange: ClosedRange<Double> = 0.05...1.0
     static let glowRange: ClosedRange<Double> = 0...60
     static let strokeRange: ClosedRange<Double> = 1...24
+    static let trailHoldRange: ClosedRange<Double> = 0.2...30
+    static let trailFadeRange: ClosedRange<Double> = 0.1...10
+    static let trailWidthRange: ClosedRange<Double> = 1...40
+    static let trailGlowRange: ClosedRange<Double> = 0...60
 
     private let defaults: UserDefaults
 
@@ -88,6 +108,21 @@ final class SettingsStore: ObservableObject {
 
     @Published var rgba: RGBAColor {
         didSet { persist(try? JSONEncoder().encode(rgba), forKey: Key.color) }
+    }
+
+    @Published var trailEnabled: Bool { didSet { persist(trailEnabled, forKey: Key.trailEnabled) } }
+    @Published var trailModifier: TrailModifier {
+        didSet { persist(trailModifier.rawValue, forKey: Key.trailModifier) }
+    }
+    @Published var trailHoldDuration: Double { didSet { persist(trailHoldDuration, forKey: Key.trailHoldDuration) } }
+    @Published var trailFadeDuration: Double { didSet { persist(trailFadeDuration, forKey: Key.trailFadeDuration) } }
+    @Published var trailWidth: Double { didSet { persist(trailWidth, forKey: Key.trailWidth) } }
+    @Published var trailGlowRadius: Double { didSet { persist(trailGlowRadius, forKey: Key.trailGlowRadius) } }
+    @Published var trailUsesCursorColor: Bool {
+        didSet { persist(trailUsesCursorColor, forKey: Key.trailUsesCursorColor) }
+    }
+    @Published var trailRGBA: RGBAColor {
+        didSet { persist(try? JSONEncoder().encode(trailRGBA), forKey: Key.trailColor) }
     }
 
     private func persist(_ value: Any?, forKey key: String) {
@@ -112,6 +147,22 @@ final class SettingsStore: ObservableObject {
             rgba = Default.color
         }
 
+        trailEnabled = defaults.object(forKey: Key.trailEnabled) as? Bool ?? Default.trailEnabled
+        trailModifier = (defaults.string(forKey: Key.trailModifier).flatMap(TrailModifier.init(rawValue:)))
+            ?? Default.trailModifier
+        trailHoldDuration = defaults.object(forKey: Key.trailHoldDuration) as? Double ?? Default.trailHoldDuration
+        trailFadeDuration = defaults.object(forKey: Key.trailFadeDuration) as? Double ?? Default.trailFadeDuration
+        trailWidth = defaults.object(forKey: Key.trailWidth) as? Double ?? Default.trailWidth
+        trailGlowRadius = defaults.object(forKey: Key.trailGlowRadius) as? Double ?? Default.trailGlowRadius
+        trailUsesCursorColor = defaults.object(forKey: Key.trailUsesCursorColor) as? Bool ?? Default.trailUsesCursorColor
+
+        if let data = defaults.data(forKey: Key.trailColor),
+           let decoded = try? JSONDecoder().decode(RGBAColor.self, from: data) {
+            trailRGBA = decoded
+        } else {
+            trailRGBA = Default.trailColor
+        }
+
         clampToValidRanges()
     }
 
@@ -122,12 +173,24 @@ final class SettingsStore: ObservableObject {
         glowRadius = Default.glowRadius
         strokeWidth = Default.strokeWidth
         rgba = Default.color
+        trailEnabled = Default.trailEnabled
+        trailModifier = Default.trailModifier
+        trailHoldDuration = Default.trailHoldDuration
+        trailFadeDuration = Default.trailFadeDuration
+        trailWidth = Default.trailWidth
+        trailGlowRadius = Default.trailGlowRadius
+        trailUsesCursorColor = Default.trailUsesCursorColor
+        trailRGBA = Default.trailColor
     }
 
     private func clampToValidRanges() {
         size = size.clamped(to: Self.sizeRange)
         opacity = opacity.clamped(to: Self.opacityRange)
         glowRadius = glowRadius.clamped(to: Self.glowRange)
+        trailHoldDuration = trailHoldDuration.clamped(to: Self.trailHoldRange)
+        trailFadeDuration = trailFadeDuration.clamped(to: Self.trailFadeRange)
+        trailWidth = trailWidth.clamped(to: Self.trailWidthRange)
+        trailGlowRadius = trailGlowRadius.clamped(to: Self.trailGlowRange)
         strokeWidth = strokeWidth.clamped(to: Self.strokeRange)
     }
 }

@@ -1,5 +1,6 @@
 import AppKit
 import Combine
+import QuartzCore
 
 @MainActor
 final class OverlayController {
@@ -16,6 +17,7 @@ final class OverlayController {
     private var cancellable: AnyCancellable?
     private var lastCursorLocation: CGPoint = NSEvent.mouseLocation
     private var isStarted = false
+    private var trail = StrokeTrail()
 
     init(settings: SettingsStore) {
         self.settings = settings
@@ -64,11 +66,12 @@ final class OverlayController {
             let panel = OverlayPanel(contentView: view)
             panel.setFrame(screen.frame, display: false)
             view.frame = CGRect(origin: .zero, size: screen.frame.size)
-            let tracker = CursorTracker(hostView: view) { [weak self] location in
-                self?.move(to: location)
+            let tracker = CursorTracker(hostView: view) { [weak self] location, flags in
+                self?.handleTick(location: location, flags: flags)
             }
             return ScreenOverlay(panel: panel, view: view, tracker: tracker)
         }
+        trail.clear()
     }
 
     private func tearDownOverlays() {
@@ -99,11 +102,27 @@ final class OverlayController {
                 overlay.tracker.stop()
                 overlay.panel.orderOut(nil)
             }
+            trail.clear()
         }
         reposition()
     }
 
-    private func move(to location: CGPoint) {
+    private func handleTick(location: CGPoint, flags: NSEvent.ModifierFlags) {
+        let shouldDraw = settings.isEnabled && settings.trailEnabled && settings.trailModifier.isActive(in: flags)
+        let locationChanged = location != lastCursorLocation
+
+        // カーソルが静止していて、描画中でも軌跡が残ってもいなければ何もすることがない。
+        guard shouldDraw || trail.isDrawing || !trail.strokes.isEmpty || locationChanged else {
+            return
+        }
+
+        let now = CACurrentMediaTime()
+        trail.setDrawing(shouldDraw, at: now)
+        if shouldDraw, locationChanged {
+            trail.append(location)
+        }
+        trail.prune(now: now, hold: settings.trailHoldDuration, fade: settings.trailFadeDuration)
+
         lastCursorLocation = location
         reposition()
     }
@@ -114,20 +133,30 @@ final class OverlayController {
             width: configuration.canvasSize.width / 2,
             height: configuration.canvasSize.height / 2
         )
-        let glowRect = CGRect(
+        let cursorRect = CGRect(
             x: lastCursorLocation.x - half.width,
             y: lastCursorLocation.y - half.height,
             width: half.width * 2,
             height: half.height * 2
         )
 
+        let now = CACurrentMediaTime()
+        let renderItems = trail.renderItems(at: now, hold: settings.trailHoldDuration, fade: settings.trailFadeDuration)
+        let trailPadding = configuration.trailGlowRadius * 4 + configuration.trailWidth
+        let trailRect = trail.bounds(at: now, hold: settings.trailHoldDuration, fade: settings.trailFadeDuration)
+            .map { $0.insetBy(dx: -trailPadding, dy: -trailPadding) }
+
         for overlay in overlays {
-            // グローの外接矩形がそのスクリーンに掛からないなら、合成コストを避けるため隠す。
-            overlay.view.isHidden = !overlay.panel.frame.intersects(glowRect)
+            let cursorOnScreen = overlay.panel.frame.intersects(cursorRect)
+            let trailOnScreen = trailRect.map { overlay.panel.frame.intersects($0) } ?? false
+            // どちらの外接矩形もそのスクリーンに掛からないなら、合成コストを避けるため隠す。
+            overlay.view.isHidden = !cursorOnScreen && !trailOnScreen
+            overlay.view.setCursorVisible(cursorOnScreen)
             overlay.view.update(
                 cursorLocation: lastCursorLocation,
                 screenOrigin: overlay.panel.frame.origin
             )
+            overlay.view.updateTrail(renderItems)
         }
     }
 }

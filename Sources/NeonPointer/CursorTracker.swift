@@ -1,18 +1,17 @@
 import AppKit
 import QuartzCore
 
-/// ディスプレイのリフレッシュに合わせてカーソル座標をポーリングする。
-/// `NSEvent.mouseLocation` を読むだけなのでアクセシビリティ権限は不要。
+/// ディスプレイのリフレッシュに合わせてカーソル座標と修飾キーの状態をポーリングする。
+/// `NSEvent.mouseLocation` / `NSEvent.modifierFlags` を読むだけなのでアクセシビリティ権限は不要。
 @MainActor
 final class CursorTracker {
     private weak var hostView: NSView?
     private var displayLink: CADisplayLink?
-    private var lastLocation: CGPoint?
-    private let onMove: (CGPoint) -> Void
+    private let onTick: (CGPoint, NSEvent.ModifierFlags) -> Void
 
-    init(hostView: NSView, onMove: @escaping (CGPoint) -> Void) {
+    init(hostView: NSView, onTick: @escaping (CGPoint, NSEvent.ModifierFlags) -> Void) {
         self.hostView = hostView
-        self.onMove = onMove
+        self.onTick = onTick
     }
 
     var isRunning: Bool { displayLink != nil }
@@ -22,7 +21,6 @@ final class CursorTracker {
         let link = hostView.displayLink(target: self, selector: #selector(tick))
         link.add(to: .main, forMode: .common)
         displayLink = link
-        lastLocation = nil
         tick()
     }
 
@@ -31,11 +29,9 @@ final class CursorTracker {
         displayLink = nil
     }
 
+    /// 軌跡のフェード計算を進める必要があるため、座標が変わらないフレームでも毎回呼ぶ。
     @objc private func tick() {
-        let location = NSEvent.mouseLocation
-        guard location != lastLocation else { return }
-        lastLocation = location
-        onMove(location)
+        onTick(NSEvent.mouseLocation, NSEvent.modifierFlags)
     }
 
     deinit {

@@ -7,6 +7,9 @@ struct NeonConfiguration: Equatable {
     var glowRadius: CGFloat
     var strokeWidth: CGFloat
     var color: RGBAColor
+    var trailWidth: CGFloat
+    var trailGlowRadius: CGFloat
+    var trailColor: RGBAColor
 
     init(settings: SettingsStore) {
         shape = settings.shape
@@ -15,6 +18,9 @@ struct NeonConfiguration: Equatable {
         glowRadius = CGFloat(settings.glowRadius)
         strokeWidth = CGFloat(settings.strokeWidth)
         color = settings.rgba
+        trailWidth = CGFloat(settings.trailWidth)
+        trailGlowRadius = CGFloat(settings.trailGlowRadius)
+        trailColor = settings.trailUsesCursorColor ? settings.rgba : settings.trailRGBA
     }
 
     /// 光がはみ出す分の余白。外側グローはシャドウ半径の 2 倍まで広がる。
@@ -26,6 +32,27 @@ struct NeonConfiguration: Equatable {
     }
 }
 
+/// 軌跡の 1 ストローク分のレイヤー群。カーソル本体と同じ「半径違いの影を重ねる」手法を使う。
+private final class TrailStrokeLayers {
+    let group = CALayer()
+    let outerGlow = CAShapeLayer()
+    let glow = CAShapeLayer()
+    let core = CAShapeLayer()
+
+    init() {
+        group.masksToBounds = false
+        group.anchorPoint = .zero
+        for shapeLayer in [outerGlow, glow, core] {
+            shapeLayer.masksToBounds = false
+            shapeLayer.fillColor = nil
+            shapeLayer.lineCap = .round
+            shapeLayer.lineJoin = .round
+            shapeLayer.anchorPoint = .zero
+            group.addSublayer(shapeLayer)
+        }
+    }
+}
+
 final class NeonCursorView: NSView {
     /// カーソル位置に追従する層。ビュー自体はスクリーン全面に固定され、
     /// この層だけを `position` で動かすことで、ウィンドウをまたぐ移動を避ける。
@@ -33,6 +60,11 @@ final class NeonCursorView: NSView {
     private let outerGlowLayer = CAShapeLayer()
     private let glowLayer = CAShapeLayer()
     private let coreLayer = CAShapeLayer()
+
+    /// 軌跡を乗せる層。パスはグローバル座標そのままで構築し、この層を
+    /// `-screenOrigin` だけ動かすことで各スクリーンのビューに正しい位置で映す。
+    private let trailContainer = CALayer()
+    private var trailLayers: [Int: TrailStrokeLayers] = [:]
 
     private var shapeLayers: [CAShapeLayer] { [outerGlowLayer, glowLayer, coreLayer] }
 
@@ -48,6 +80,11 @@ final class NeonCursorView: NSView {
         super.init(frame: .zero)
         wantsLayer = true
         layer?.masksToBounds = false
+
+        trailContainer.masksToBounds = false
+        trailContainer.anchorPoint = .zero
+        layer?.addSublayer(trailContainer)
+
         neonLayer.masksToBounds = false
         neonLayer.bounds = CGRect(origin: .zero, size: configuration.canvasSize)
         layer?.addSublayer(neonLayer)
@@ -75,6 +112,10 @@ final class NeonCursorView: NSView {
         layer?.contentsScale = scale
         neonLayer.contentsScale = scale
         shapeLayers.forEach { $0.contentsScale = scale }
+        trailContainer.contentsScale = scale
+        for strokeLayers in trailLayers.values {
+            [strokeLayers.outerGlow, strokeLayers.glow, strokeLayers.core].forEach { $0.contentsScale = scale }
+        }
         redraw()
     }
 
@@ -87,7 +128,66 @@ final class NeonCursorView: NSView {
             x: cursorLocation.x - screenOrigin.x,
             y: cursorLocation.y - screenOrigin.y
         )
+        // 軌跡のパスはグローバル座標のまま構築されているため、層ごと平行移動させる。
+        trailContainer.position = CGPoint(x: -screenOrigin.x, y: -screenOrigin.y)
         CATransaction.commit()
+    }
+
+    /// カーソル本体の表示・非表示だけを切り替える（軌跡はこの影響を受けない）。
+    func setCursorVisible(_ visible: Bool) {
+        neonLayer.isHidden = !visible
+    }
+
+    /// 現在生存している軌跡ストロークを反映する。`items` に無い id のレイヤーは破棄する。
+    func updateTrail(_ items: [TrailRenderItem]) {
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        defer { CATransaction.commit() }
+
+        let color = configuration.trailColor
+        let coreColor = color.lightened(by: 0.35)
+        let width = configuration.trailWidth
+        let glowRadius = configuration.trailGlowRadius
+
+        var seenIDs = Set<Int>()
+        for item in items {
+            seenIDs.insert(item.id)
+
+            let strokeLayers: TrailStrokeLayers
+            if let existing = trailLayers[item.id] {
+                strokeLayers = existing
+            } else {
+                let created = TrailStrokeLayers()
+                let scale = window?.backingScaleFactor ?? 2
+                [created.outerGlow, created.glow, created.core].forEach { $0.contentsScale = scale }
+                trailContainer.addSublayer(created.group)
+                trailLayers[item.id] = created
+                strokeLayers = created
+            }
+
+            strokeLayers.group.opacity = Float(item.alpha)
+            strokeLayers.outerGlow.path = item.path
+            strokeLayers.glow.path = item.path
+            strokeLayers.core.path = item.path
+
+            for (shapeLayer, spread) in [(strokeLayers.outerGlow, 2.0), (strokeLayers.glow, 0.8)] {
+                shapeLayer.strokeColor = color.cgColor
+                shapeLayer.lineWidth = width
+                shapeLayer.shadowColor = color.cgColor
+                shapeLayer.shadowOpacity = 1
+                shapeLayer.shadowRadius = glowRadius * spread
+                shapeLayer.shadowOffset = .zero
+                // shadowPath を指定すると線形状のグローが崩れる。カーソル本体と同じ理由。
+                shapeLayer.shadowPath = nil
+            }
+            strokeLayers.core.strokeColor = coreColor.cgColor
+            strokeLayers.core.lineWidth = max(1, width * 0.4)
+        }
+
+        for (id, strokeLayers) in trailLayers where !seenIDs.contains(id) {
+            strokeLayers.group.removeFromSuperlayer()
+            trailLayers.removeValue(forKey: id)
+        }
     }
 
     private func redraw() {
