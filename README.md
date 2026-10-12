@@ -11,6 +11,7 @@
 - **修飾キーを押しながらカーソルを動かすと画面に線を描ける**（描いた線は時間経過で自動的に消える）
 - メニューバーから ON/OFF と全設定を操作
 - ログイン時の自動起動に対応
+- フルスクリーン動画などでシステムカーソルが消えたとき、ネオンも一緒に隠せる（設定でON/OFF）
 - 複数ディスプレイに対応
 - 設定は自動保存（`UserDefaults`）
 - オーバーレイはクリックを透過するので、下のアプリの操作を邪魔しません
@@ -89,6 +90,7 @@ SIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" make dmg
 | `Sources/NeonPointer/StrokeTrail.swift` | 軌跡ストロークの点列・パス・フェード状態の管理 |
 | `Sources/NeonPointer/TrailModifier.swift` | 軌跡描画のトリガーとなる修飾キーの定義 |
 | `Sources/NeonPointer/LoginItemManager.swift` | ログイン時の自動起動（`SMAppService`） |
+| `Sources/NeonPointer/SystemCursorVisibility.swift` | システムカーソルの表示状態の判定 |
 | `Sources/NeonPointer/ColorPanelController.swift` | 色選択パネル（`NSColorPanel`）の制御 |
 
 ## ライセンス

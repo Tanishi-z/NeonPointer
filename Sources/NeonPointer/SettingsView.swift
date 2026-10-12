@@ -17,6 +17,11 @@ struct SettingsView: View {
             .toggleStyle(.switch)
             .font(.callout)
 
+            Toggle("カーソルが消えたらネオンも隠す", isOn: $settings.hideWhenCursorHidden)
+                .toggleStyle(.switch)
+                .font(.callout)
+                .disabled(!settings.isEnabled)
+
             Divider()
 
             VStack(alignment: .leading, spacing: 12) {

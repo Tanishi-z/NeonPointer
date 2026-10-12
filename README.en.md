@@ -11,6 +11,7 @@ Landing page: https://tanishi-z.github.io/NeonPointer/
 - **Hold a modifier key while moving the cursor to draw on screen** (the line fades away on its own after a while)
 - Toggle on/off and change all settings from the menu bar
 - Launches automatically at login
+- Can hide the neon when the system cursor disappears (e.g. in fullscreen video); toggle in settings
 - Works across multiple displays
 - Settings are saved automatically (`UserDefaults`)
 - The overlay is click-through, so it never gets in the way of the app underneath
@@ -89,6 +90,7 @@ To notarize the app, run `xcrun notarytool submit` and `xcrun stapler staple` ag
 | `Sources/NeonPointer/StrokeTrail.swift` | Manages trail stroke points, paths, and fade state |
 | `Sources/NeonPointer/TrailModifier.swift` | Defines the modifier key that triggers trail drawing |
 | `Sources/NeonPointer/LoginItemManager.swift` | Launch at login (`SMAppService`) |
+| `Sources/NeonPointer/SystemCursorVisibility.swift` | Detects whether the system cursor is hidden |
 | `Sources/NeonPointer/ColorPanelController.swift` | Controls the color picker panel (`NSColorPanel`) |
 
 ## License

@@ -50,6 +50,7 @@ final class SettingsStore: ObservableObject {
 
     private enum Key {
         static let isEnabled = "isEnabled"
+        static let hideWhenCursorHidden = "hideWhenCursorHidden"
         static let shape = "shape"
         static let size = "size"
         static let opacity = "opacity"
@@ -68,6 +69,7 @@ final class SettingsStore: ObservableObject {
 
     private enum Default {
         static let isEnabled = true
+        static let hideWhenCursorHidden = false
         static let shape = PointerShape.ring
         static let size: Double = 48
         static let opacity: Double = 0.75
@@ -100,6 +102,9 @@ final class SettingsStore: ObservableObject {
     let didChange = PassthroughSubject<Void, Never>()
 
     @Published var isEnabled: Bool { didSet { persist(isEnabled, forKey: Key.isEnabled) } }
+    @Published var hideWhenCursorHidden: Bool {
+        didSet { persist(hideWhenCursorHidden, forKey: Key.hideWhenCursorHidden) }
+    }
     @Published var shape: PointerShape { didSet { persist(shape.rawValue, forKey: Key.shape) } }
     @Published var size: Double { didSet { persist(size, forKey: Key.size) } }
     @Published var opacity: Double { didSet { persist(opacity, forKey: Key.opacity) } }
@@ -134,6 +139,8 @@ final class SettingsStore: ObservableObject {
         self.defaults = defaults
 
         isEnabled = defaults.object(forKey: Key.isEnabled) as? Bool ?? Default.isEnabled
+        hideWhenCursorHidden = defaults.object(forKey: Key.hideWhenCursorHidden) as? Bool
+            ?? Default.hideWhenCursorHidden
         shape = (defaults.string(forKey: Key.shape).flatMap(PointerShape.init(rawValue:))) ?? Default.shape
         size = defaults.object(forKey: Key.size) as? Double ?? Default.size
         opacity = defaults.object(forKey: Key.opacity) as? Double ?? Default.opacity
@@ -167,6 +174,7 @@ final class SettingsStore: ObservableObject {
     }
 
     func resetToDefaults() {
+        hideWhenCursorHidden = Default.hideWhenCursorHidden
         shape = Default.shape
         size = Default.size
         opacity = Default.opacity

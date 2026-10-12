@@ -18,6 +18,8 @@ final class OverlayController {
     private var lastCursorLocation: CGPoint = NSEvent.mouseLocation
     private var isStarted = false
     private var trail = StrokeTrail()
+    /// システムカーソルが隠れていて、ネオンも隠すべき状態か。
+    private var isCursorSuppressed = false
 
     init(settings: SettingsStore) {
         self.settings = settings
@@ -84,6 +86,7 @@ final class OverlayController {
 
     private func applySettings() {
         let configuration = NeonConfiguration(settings: settings)
+        if !settings.hideWhenCursorHidden { isCursorSuppressed = false }
 
         for overlay in overlays {
             overlay.view.configuration = configuration
@@ -108,11 +111,16 @@ final class OverlayController {
     }
 
     private func handleTick(location: CGPoint, flags: NSEvent.ModifierFlags) {
-        let shouldDraw = settings.isEnabled && settings.trailEnabled && settings.trailModifier.isActive(in: flags)
+        let suppressed = settings.hideWhenCursorHidden && !SystemCursorVisibility.isVisible()
+        let suppressionChanged = suppressed != isCursorSuppressed
+        isCursorSuppressed = suppressed
+
+        let shouldDraw = settings.isEnabled && settings.trailEnabled
+            && settings.trailModifier.isActive(in: flags) && !suppressed
         let locationChanged = location != lastCursorLocation
 
         // カーソルが静止していて、描画中でも軌跡が残ってもいなければ何もすることがない。
-        guard shouldDraw || trail.isDrawing || !trail.strokes.isEmpty || locationChanged else {
+        guard shouldDraw || trail.isDrawing || !trail.strokes.isEmpty || locationChanged || suppressionChanged else {
             return
         }
 
@@ -150,8 +158,9 @@ final class OverlayController {
             let cursorOnScreen = overlay.panel.frame.intersects(cursorRect)
             let trailOnScreen = trailRect.map { overlay.panel.frame.intersects($0) } ?? false
             // どちらの外接矩形もそのスクリーンに掛からないなら、合成コストを避けるため隠す。
+            // カーソルが隠れているときもビュー自体は隠さない。隠すとディスプレイリンクが止まり、復帰を検知できなくなる。
             overlay.view.isHidden = !cursorOnScreen && !trailOnScreen
-            overlay.view.setCursorVisible(cursorOnScreen)
+            overlay.view.setCursorVisible(cursorOnScreen && !isCursorSuppressed)
             overlay.view.update(
                 cursorLocation: lastCursorLocation,
                 screenOrigin: overlay.panel.frame.origin
